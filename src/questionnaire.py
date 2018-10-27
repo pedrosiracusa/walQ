@@ -69,6 +69,7 @@ class Questionnaire:
         self.context.set_current_question(self.initial_question_id)
         
         while True:
+
             # Asks first question
             data = self.sendQuestion(self.context).data
 
@@ -80,9 +81,17 @@ class Questionnaire:
             # Sends response
             data = self.sendResponse(self.context).data
             print(data.get('message'))
+
+            # Get next question
+            next_question_id = data.get('next_question')
+            self.context.set_current_question(next_question_id)
+
+            if not next_question_id:
+                print("Obrigado! Fim de papo")
+                return
+
                 
 
 
 
-        return
 
