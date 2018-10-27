@@ -1,5 +1,5 @@
-from question import Question
-from context import Context
+from .question import Question
+from .context import Context
 
 
 class Questionnaire:
@@ -68,17 +68,18 @@ class Questionnaire:
         self.context = Context()
         self.context.set_current_question(self.initial_question_id)
         
-        # Asks first question
-        data = self.sendQuestion(self.context).data
+        while True:
+            # Asks first question
+            data = self.sendQuestion(self.context).data
 
-        # Saves user input
-        usr_input = input( data.get('message') )
-        self.context.set_user_input(usr_input)
-        self.saveUserInput(self.context)
+            # Saves user input
+            usr_input = input( data.get('message') )
+            self.context.set_user_input(usr_input)
+            self.saveUserInput(self.context)
 
-        # Sends response
-        data = self.sendResponse(self.context).data
-        print(data.get('message'))
+            # Sends response
+            data = self.sendResponse(self.context).data
+            print(data.get('message'))
                 
 
 
