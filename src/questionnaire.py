@@ -16,7 +16,31 @@ class Questionnaire:
         
         if questionnaire_dict:
             self.questions = { qname: Question(qname,**qattrs) for qname, qattrs in questionnaire_dict.items() }
+
+        else:
+            self.questions = dict()
             
+
+    def addQuestion(self, id, prompt, input_type="text", is_initial_question=False, options=None):
+
+        # text type question
+        if input_type=="text":
+            self.questions[id] = Question( id, prompt=prompt, input_type=input_type)
+
+        # multiple-choice question
+        elif input_type=="choice":
+            self.questions[id] = Question( id, prompt=prompt, 
+                                      input_type=input_type,
+                                      options=list(range(len(options))),
+                                      options_text=options)
+
+        # Other types (number)
+        else:
+            self.questions[id] = Question( id, prompt=prompt, input_type=input_type)
+
+        if is_initial_question:
+            self.initial_question_id = id
+        
 
     def attachResponse(self, question_id, response_message=None, response_condition=None):
         """
@@ -32,6 +56,21 @@ class Questionnaire:
         question = self.questions.get(question_id)
         if question:
             question.response = Response(message=response_message, condition=response_condition)
+
+    def setLink(self, q_src, q_tgt, condition=None):
+        if condition is None:
+            self.questions[q_src].next = [q_tgt]
+
+        else:
+            if self.questions.get(q_src).next is None: 
+                self.questions[q_src].next = [None,None]
+
+            if condition==1:
+                self.questions[q_src].next[1]=q_tgt
+            else:
+                self.questions[q_src].next[0]=q_tgt
+
+
 
     
     def sendQuestion(self, context):

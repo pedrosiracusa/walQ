@@ -8,6 +8,14 @@ class Question:
         self.options_text = attr.get("options_text")
         self.next = attr.get("next")
         self.user_input_type = attr.get("input_type")
+
+    def __repr__(self):
+        return str({self.name: {'prompt':self.prompt,
+                            'options':self.options,
+                            'options_text':self.options_text,
+                            'next': self.next,
+                            'user_input_type': self.user_input_type}
+                })
         
         
     def getOptions(self):
