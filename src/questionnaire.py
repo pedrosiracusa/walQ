@@ -82,29 +82,29 @@ class Questionnaire:
         # Runs the questionnaire locally, for testing purposes
 
         # Sets context initially
-        self.context = Context()
-        self.context.set_current_question(self.initial_question_id)
+        context = Context()
+        context.set_current_question(self.initial_question_id)
         
         while True:
 
             # Asks first question
-            data = self.sendQuestion(self.context).data
+            data = self.sendQuestion(context).data
 
             # Saves user input
             usr_input = input( data.get('message') )
-            self.context.set_user_input(usr_input)
-            self.saveUserInput(self.context)
+            context.set_user_input(usr_input)
+            self.saveUserInput(context)
 
             # Sends response
-            data = self.sendResponse(self.context).data
+            data = self.sendResponse(context).data
             print(data.get('message'))
 
             # Get next question
             next_question_id = data.get('next_question')
-            self.context.set_current_question(next_question_id)
+            context.set_current_question(next_question_id)
 
             if not next_question_id:
-                return
+                return context.data.get('responses')
 
                 
 
