@@ -1,4 +1,5 @@
 from .question import Question
+from .response import Response
 from .context import Context
 
 
@@ -16,6 +17,22 @@ class Questionnaire:
         if questionnaire_dict:
             self.questions = { qname: Question(qname,**qattrs) for qname, qattrs in questionnaire_dict.items() }
             
+
+    def attachResponse(self, question_id, response_message=None, response_condition=None):
+        """
+        Attaches a response to a question.
+        A response can be either a static message (a string) or a condition (a function), in case the response message depends on the user response.
+        In case both a message and a condition are passed, the condition is evaluated.
+
+        Parameters:
+            question_id: The id of the question to which the response must be attached.
+            response_message: The response to be attached to the question, as a static string.
+            response_condition: The response to be attached to the question, as a condition that is evaluated using the user input.
+        """
+        question = self.questions.get(question_id)
+        if question:
+            question.response = Response(message=response_message, condition=response_condition)
+
     
     def sendQuestion(self, context):
         """
@@ -87,7 +104,6 @@ class Questionnaire:
             self.context.set_current_question(next_question_id)
 
             if not next_question_id:
-                print("Obrigado! Fim de papo")
                 return
 
                 

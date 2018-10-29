@@ -21,8 +21,6 @@ class Question:
     def isFinalQuestion(self):
         return True if self.next is None else False
     
-    def attachResponse(self, response):
-        self.response=response
         
     def respond(self, context):
         """
