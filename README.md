@@ -1,2 +1,2 @@
 # walQ
-An extremely simple, questionnaire-based chatbot
+An extremely simple, questionnaire-based chatbot using pure Python.
