@@ -80,6 +80,7 @@ q.attachResponse('q7', response_message="hmm.. interesting!")
 q.attachResponse('q8', response_message="ok then...")
 q.attachResponse('q9', response_condition=lambda x: ["Ok! It was nice talking to you. See you later.", "Ok... I'm not much more than what you have just seen... While I still do not have a formal documentation, take a look at the code at \"examples\". See U!"][x] )
 
-res = q.run()
-print("Here is the data I recorded from our conversation:")
-print(res)
+if __name__ =='__main__':
+    res = q.run()
+    print("Here is the data I recorded from our conversation:")
+    print(res)

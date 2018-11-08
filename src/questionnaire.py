@@ -77,6 +77,9 @@ class Questionnaire:
         """
         Sends current question (from context) to user
         """
+        if not isinstance(context, Context):
+            context = Context.from_json_data(context)
+
         questionId = context.data['current_question']
         q = self.questions.get(questionId)
         context.data['message']=q.promptMessage()
@@ -99,6 +102,9 @@ class Questionnaire:
         Finally, clears user input
         input type: 'text','number','choice'
         """
+        if not isinstance(context, Context):
+            context = Context.from_json_data(context)
+
         user_input = context.data.get('user_input','')
         questionId = context.data.get('current_question')
         q = self.questions.get(questionId)
@@ -109,6 +115,9 @@ class Questionnaire:
         return context
     
     def sendResponse(self, context):
+        if not isinstance(context, Context):
+            context = Context.from_json_data(context)
+
         questionId = context.data.get('current_question')
         user_input = context.data['responses'].get(questionId)
         q = self.questions.get(questionId)
@@ -116,6 +125,15 @@ class Questionnaire:
         context.data['message'] = response
         context.data['next_question'] = q.getNextQuestionName(user_input)
         return context
+
+    
+    def sendFirstMessage(self):
+        # Sets context initially
+        context = Context()
+        context.set_current_question(self.initial_question_id)
+        return self.sendQuestion(context).data
+
+
 
     def run(self):
         # Runs the questionnaire locally, for testing purposes
