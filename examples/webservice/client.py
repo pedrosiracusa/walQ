@@ -1,6 +1,14 @@
+# -*- coding: utf-8 -*-
+"""Example of an application using walQ Restful API.
+
+This module runs a very simple application which interacts with the walQ
+restful api. 
+"""
+
 import os
 import requests
 import json
+import re
 from flask import Flask, request, session, render_template
 
 
@@ -13,6 +21,7 @@ api_endpoint = 'http://localhost:5000'
 def initialize():
     if request.method=='GET':
         context_data = requests.get(api_endpoint).json()
+        session.clear()
         session['context_data'] = context_data
         message = context_data.get('message')
         return render_template('form.html',message=message) 
@@ -31,15 +40,20 @@ def initialize():
         try:
             context_data = requests.post(api_endpoint, data=json.dumps(context_data)).json()
             message = context_data.get('message')
+            message = re.sub("\s*{.*}\s*", "", message)
 
         except:
-            message='End'
+            session.clear()
+            return render_template('form.html', answer=answer)
 
         # update session data (context)
         session.clear()
         session['context_data']=context_data
         
-        return render_template('form.html',message=message, answer=answer)
+        return render_template('form.html',message=message, answer=answer,
+                                input_type=context_data.get('input_type'), 
+                                input_vals=[ list(i) for i in zip(context_data.get('input_options'),context_data.get('input_options_text')) ]
+        )
     
 
 

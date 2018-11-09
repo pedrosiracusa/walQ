@@ -1,3 +1,12 @@
+# -*- coding: utf-8 -*-
+"""Example of walQ running as a Restful API service.
+
+This module runs a very simple flask restful api for running through the
+questionnaire. The api responds to GET requests by sending the initial 
+question; and to POST requests by saving user input to the context object
+and sending the next question.
+"""
+
 from flask import Flask, request
 from flask_restful import Api, Resource
 

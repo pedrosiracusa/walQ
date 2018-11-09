@@ -1,5 +1,17 @@
-<p>{{answer}}</p>
+{% if answer != None %}
+    <p>{{answer}}</p>
+{% endif %}
+
 <p>{{message}}</p>
-<form action="http://localhost:5001/" method="POST">
-    <input  type="text", name="input"/>
-</form>
+
+{% if message %}
+    <form action="http://localhost:5001/" method="POST">
+    {% if input_type == 'choice' %}
+        {% for v in input_vals %}
+        <button type="submit" name="input" value={{v[0]}}>{{v[1]}}</button>
+        {% endfor %}
+    {% else %}
+        <input  type="text", name="input"/>
+    {% endif %}
+    </form>
+{% endif %}
