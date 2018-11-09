@@ -10,7 +10,7 @@ and sending the next question.
 from flask import Flask, request
 from flask_restful import Api, Resource
 
-from src import Questionnaire
+from walq import Questionnaire
 from examples.quest1 import q
 
 app = Flask(__name__)

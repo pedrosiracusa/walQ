@@ -1,4 +1,4 @@
-from src import Questionnaire
+from walq import Questionnaire
 
 q = Questionnaire()
 
