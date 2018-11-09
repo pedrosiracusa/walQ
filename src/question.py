@@ -8,6 +8,7 @@ class Question:
         self.options_text = attr.get("options_text")
         self.next = attr.get("next")
         self.user_input_type = attr.get("input_type")
+        self.response = None
 
     def __repr__(self):
         return str({self.name: {'prompt':self.prompt,
