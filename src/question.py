@@ -35,7 +35,8 @@ class Question:
         """
         Returns the response message (associated to the respective Response object)
         """
-        if not hasattr(self,'response'):
+
+        if self.response is None:
             return None
         
         user_input=context.data['responses'][self.name]
