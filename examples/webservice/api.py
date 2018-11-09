@@ -2,7 +2,7 @@ from flask import Flask, request
 from flask_restful import Api, Resource
 
 from src import Questionnaire
-from quest1 import q
+from examples.quest1 import q
 
 app = Flask(__name__)
 api = Api(app)
@@ -16,7 +16,7 @@ class Conversation(Resource):
     def post(self):
         c=request.get_json(force=True)
 
-        # If user input is set
+        # If user input is set, save it to context
         if c.get('user_input','') != '':
             c = q.saveUserInput(c)
             c = q.sendResponse(c)
