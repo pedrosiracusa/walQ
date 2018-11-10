@@ -63,7 +63,8 @@ q.attachResponse('q2', response_message="Ok, then!")
 
 def cond_age(age):
     if age <= 10: return "Wow! Are you a coder already??"
-    elif age <=18: return "Now you are fully reponsible for your acts!"
+    elif age <18: return "Such a young fellow!"
+    elif age ==18: return "Now you are fully reponsible for your acts!"
     elif age <20: return "Almost 20!"
     elif age <=27: return "Still a youngster!"
     elif age <30: return "Almost 30!"
