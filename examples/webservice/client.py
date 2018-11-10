@@ -50,10 +50,13 @@ def initialize():
         session.clear()
         session['context_data']=context_data
         
-        return render_template('form.html',message=message, answer=answer,
-                                input_type=context_data.get('input_type'), 
-                                input_vals=[ list(i) for i in zip(context_data.get('input_options'),context_data.get('input_options_text')) ]
-        )
+        if context_data.get('input_type')=='choice':
+            return render_template('form.html',message=message, answer=answer,
+                                    input_type=context_data.get('input_type'), 
+                                    input_vals=[ list(i) for i in zip(context_data.get('input_options'),context_data.get('input_options_text')) ]
+            )
+        else:
+            return render_template('form.html',message=message, answer=answer)
     
 
 
