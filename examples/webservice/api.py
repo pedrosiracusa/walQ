@@ -10,7 +10,7 @@ and sending the next question.
 from flask import Flask, request
 from flask_restful import Api, Resource
 
-from walq import Questionnaire
+from walq import Questionnaire, Context
 from examples.quest1 import q
 
 app = Flask(__name__)
@@ -20,22 +20,23 @@ api = Api(app)
 class Conversation(Resource):
     def get(self):
         # First interaction with the app: send the initial message to user
-        return q.sendFirstMessage()
+        return q.sendFirstMessage().to_dict()
 
     def post(self):
-        c=request.get_json(force=True)
+        c = Context.from_json_data( request.get_json(force=True) )
 
         # If user input is set, save it to context
-        if c.get('user_input','') != '':
+        if c.get_user_input() != '':
             c = q.saveUserInput(c)
             c = q.sendResponse(c)
-            return c.data
+            return c.to_dict()
 
         # If user input was already processed, send next question
-        elif c.get('current_question') in c['responses'].keys():
-            c['current_question']=c['next_question']
+        elif c.flags.get('send_next_question') is not None:
+            c.flags.pop('send_next_question')
+            c.set_current_question( c.get_next_question() )
             c = q.sendQuestion(c)
-            return c.data
+            return c.to_dict()
             
         else:
             return c

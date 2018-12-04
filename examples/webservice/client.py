@@ -30,7 +30,8 @@ def initialize():
     elif request.method=='POST':
         usr_input = request.form.get('input')
         context_data = session['context_data'] 
-        context_data['user_input']=usr_input
+        context_data['usrinput'] = {'data':usr_input}
+
 
         # Get the response
         context_data = requests.post(api_endpoint, data=json.dumps(context_data)).json()
@@ -50,10 +51,10 @@ def initialize():
         session.clear()
         session['context_data']=context_data
         
-        if context_data.get('input_type')=='choice':
+        if context_data.get('usrinput').get('type')=='choice':
             return render_template('form.html',message=message, answer=answer,
-                                    input_type=context_data.get('input_type'), 
-                                    input_vals=[ list(i) for i in zip(context_data.get('input_options'),context_data.get('input_options_text')) ]
+                                    input_type=context_data.get('usrinput').get('type'), 
+                                    input_vals=[ list(i) for i in zip(context_data.get('usrinput').get('options'), context_data.get('usrinput').get('options_text')) ]
             )
         else:
             return render_template('form.html',message=message, answer=answer)

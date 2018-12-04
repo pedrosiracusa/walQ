@@ -39,7 +39,7 @@ class Question:
         if self.response is None:
             return None
         
-        user_input=context.data['responses'][self.name]
+        user_input=context.read_user_response(self.name)
         return self.response.getResponse(user_input)
 
     

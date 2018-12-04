@@ -80,19 +80,19 @@ class Questionnaire:
         if not isinstance(context, Context):
             context = Context.from_json_data(context)
 
-        questionId = context.data['current_question']
+        questionId = context.get_current_question()
         q = self.questions.get(questionId)
-        context.data['message']=q.promptMessage()
-        context.data['user_input']=''
-        context.data['input_type']=q.user_input_type
+        context.set_message( q.promptMessage() )
+        context.reset_user_input( '', input_type=q.user_input_type )
         
         input_options = q.options
         if input_options:
-            context.data['input_options']=input_options
+            context.set_input_options(input_options)
             
         input_options_text = q.options_text
         if input_options_text:
-            context.data['input_options_text']=input_options_text
+            context.set_input_options_text(input_options_text)
+
 
         return context
     
@@ -105,25 +105,25 @@ class Questionnaire:
         if not isinstance(context, Context):
             context = Context.from_json_data(context)
 
-        user_input = context.data.get('user_input','')
-        questionId = context.data.get('current_question')
+        user_input = context.get_user_input()
+        questionId = context.get_current_question()
         q = self.questions.get(questionId)
         
-        context.data['responses'][questionId] = q.parseUserInput(user_input)
-
+        context.save_user_response( questionId, q.parseUserInput(user_input) )
         context.clear_user_input()
+
         return context
     
     def sendResponse(self, context):
         if not isinstance(context, Context):
             context = Context.from_json_data(context)
 
-        questionId = context.data.get('current_question')
-        user_input = context.data['responses'].get(questionId)
+        questionId = context.get_current_question()
+        user_input = context.read_user_response( questionId )
         q = self.questions.get(questionId)
         response = q.respond(context)
-        context.data['message'] = response
-        context.data['next_question'] = q.getNextQuestionName(user_input)
+        context.set_message( response )
+        context.set_next_question( q.getNextQuestionName(user_input) )
         return context
 
     
@@ -131,7 +131,7 @@ class Questionnaire:
         # Sets context initially
         context = Context()
         context.set_current_question(self.initial_question_id)
-        return self.sendQuestion(context).data
+        return self.sendQuestion(context)
 
 
 
@@ -145,23 +145,23 @@ class Questionnaire:
         while True:
 
             # Asks first question
-            data = self.sendQuestion(context).data
+            msg = self.sendQuestion(context).get_message()
 
             # Saves user input
-            usr_input = input( data.get('message') )
+            usr_input = input( msg )
             context.set_user_input(usr_input)
             self.saveUserInput(context)
 
             # Sends response
-            data = self.sendResponse(context).data
-            print(data.get('message'))
+            respMsg = self.sendResponse(context).get_message()
+            print(respMsg)
 
             # Get next question
-            next_question_id = data.get('next_question')
+            next_question_id = context.get_next_question()
             context.set_current_question(next_question_id)
 
             if not next_question_id:
-                return context.data.get('responses')
+                return context.usrdata
 
                 
 
