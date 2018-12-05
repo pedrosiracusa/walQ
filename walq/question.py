@@ -42,6 +42,9 @@ class Question:
         user_input=context.read_user_response(self.name)
         return self.response.getResponse(user_input)
 
+    def getType(self):
+        return self.user_input_type
+
     
     def getNextQuestionName(self, user_input):
         """

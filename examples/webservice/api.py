@@ -23,23 +23,24 @@ class Conversation(Resource):
         return q.sendFirstMessage().to_dict()
 
     def post(self):
-        c = Context.from_json_data( request.get_json(force=True) )
+        c = Context.from_dict( request.get_json(force=True) )
 
-        # If user input is set, save it to context
-        if c.get_user_input() != '':
-            c = q.saveUserInput(c)
-            c = q.sendResponse(c)
+        # If user input is set, save it to context and send response to user
+        if c.isset_user_input():
+            q.saveUserInput(c)
+            q.sendResponse(c)
             return c.to_dict()
 
-        # If user input was already processed, send next question
-        elif c.flags.get('send_next_question') is not None:
-            c.flags.pop('send_next_question')
+        # If user input was already processed, send next question to user
+        elif c.check_flag('send_next_question'):
+            c.remove_flag('send_next_question')
             c.set_current_question( c.get_next_question() )
-            c = q.sendQuestion(c)
+            q.sendQuestion(c)
             return c.to_dict()
             
+        # If there is no question next
         else:
-            return c
+            return c.to_dict()
 
 
 api.add_resource(Conversation, '/')

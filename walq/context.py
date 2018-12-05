@@ -14,17 +14,20 @@ class Context:
         self.usrinput={}
         self.message=None
         self.usrdata={}
-        self.flags={}
-        self.from_dict = self.from_json_data # TO REMOVE
+        self.flags=[]
+        self.nextquestion=None
+        self.currentquestion=None
 
 
     @classmethod
-    def from_json_data(cls, datadict):
+    def from_dict(cls, datadict):
         ctx = cls()
         ctx.usrinput=datadict.get('usrinput')
         ctx.message=datadict.get('message')
         ctx.usrdata=datadict.get('usrdata',{})
-        ctx.flags=datadict.get('flags',{})
+        ctx.flags=datadict.get('flags',[])
+        ctx.nextquestion=datadict.get('nextquestion')
+        ctx.currentquestion=datadict.get('currentquestion')
 
         return ctx 
 
@@ -32,16 +35,18 @@ class Context:
         return { 'usrinput': self.usrinput,
                 'message': self.message,
                 'usrdata': self.usrdata,
-                'flags': self.flags }
+                'flags': self.flags,
+                'currentquestion': self.currentquestion,
+                'nextquestion': self.nextquestion }
     
 
 
 
     def get_current_question(self):
-        return self.flags.get('current_question')
+        return self.currentquestion
 
     def set_current_question(self, current_question):
-        self.flags['current_question']=current_question
+        self.currentquestion=current_question
 
 
 
@@ -50,6 +55,9 @@ class Context:
 
     def set_user_input(self, user_input):
         self.usrinput['data']=user_input
+
+    def isset_user_input(self):
+        return True if self.get_user_input()!='' else False
 
     def set_input_options(self, options):
         self.usrinput['options'] = options
@@ -65,7 +73,6 @@ class Context:
         self.set_input_type(input_type)
 
     def clear_user_input(self):
-        # TO REMOVE
         self.set_user_input('')
 
 
@@ -77,6 +84,17 @@ class Context:
         self.usrdata = data_dict
 
 
+    def add_flag(self,flag):
+        self.flags.append(flag)
+
+    def remove_flag(self,flag):
+        self.flags.remove(flag)
+
+    def check_flag(self,flag):
+        return True if flag in self.flags else False
+
+
+
 
     def set_message(self,message):
         self.message = message
@@ -85,11 +103,14 @@ class Context:
         return self.message
 
     def set_next_question(self, question_id):
-        self.flags['next_question'] = question_id
-        self.flags['send_next_question'] = True
+        self.nextquestion = question_id
+        self.add_flag('send_next_question')
 
     def get_next_question(self):
-        return self.flags['next_question']
+        return self.nextquestion
+
+    def clear_next_question(self):
+        self.nextquestion=None
 
     def save_user_response(self, question_id, response):
         self.usrdata[question_id] = response

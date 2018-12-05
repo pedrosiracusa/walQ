@@ -6,6 +6,7 @@ from .context import Context
 class Questionnaire:
     """
     Stores a graph of questions and runs it; keeps track of interactions using a context dictionary.
+    A questionnaire knows how to send questions to user, record user input and respond accordingly.
     """
     
     def __init__(self, questionnaire_dict=None, initial_question_id=None):
@@ -22,6 +23,9 @@ class Questionnaire:
             
 
     def addQuestion(self, id, prompt, input_type="text", is_initial_question=False, options=None):
+        """
+        Adds a new question to the questionnaire.
+        """
 
         # text type question
         if input_type=="text":
@@ -44,7 +48,7 @@ class Questionnaire:
 
     def attachResponse(self, question_id, response_message=None, response_condition=None):
         """
-        Attaches a response to a question.
+        Attaches a response to a question from the questionnaire.
         A response can be either a static message (a string) or a condition (a function), in case the response message depends on the user response.
         In case both a message and a condition are passed, the condition is evaluated.
 
@@ -58,6 +62,9 @@ class Questionnaire:
             question.response = Response(message=response_message, condition=response_condition)
 
     def setLink(self, q_src, q_tgt, condition=None):
+        """
+        Links two questions. If the response attached to the source question is conditional, the link can map to each branch individually. Thus, distinct target questions can be mapped to the same source question, depending on the response given to the user (ultimately, depending on the user input).
+        """
         if condition is None:
             self.questions[q_src].next = [q_tgt]
 
@@ -75,27 +82,43 @@ class Questionnaire:
     
     def sendQuestion(self, context):
         """
-        Sends current question (from context) to user
+        Sends current question (from context) to user. Changes the context object inplace.
         """
         if not isinstance(context, Context):
-            context = Context.from_json_data(context)
+            context = Context.from_dict(context)
 
         questionId = context.get_current_question()
+        context.clear_next_question()
         q = self.questions.get(questionId)
         context.set_message( q.promptMessage() )
         context.reset_user_input( '', input_type=q.user_input_type )
-        
-        input_options = q.options
-        if input_options:
-            context.set_input_options(input_options)
-            
-        input_options_text = q.options_text
-        if input_options_text:
-            context.set_input_options_text(input_options_text)
 
+        if q.getType()=='choice':
+            context.set_input_options(q.options)
+            context.set_input_options_text(q.options_text)
 
         return context
     
+    def sendResponse(self, context):
+        """
+        Sends response to user. Changes the context object inplace.
+        """
+        if not isinstance(context, Context):
+            context = Context.from_dict(context)
+
+        questionId = context.get_current_question()
+        user_input = context.read_user_response( questionId )
+        q = self.questions.get(questionId)
+        response = q.respond(context)
+        context.set_message( response )
+        if not q.isFinalQuestion():
+            context.set_next_question( q.getNextQuestionName(user_input) )
+        else:
+            context.add_flag('last_message')
+        return context
+
+
+
     def saveUserInput(self, context):
         """
         Saves user response (input) to the context, using the question to parse it.
@@ -103,7 +126,7 @@ class Questionnaire:
         input type: 'text','number','choice'
         """
         if not isinstance(context, Context):
-            context = Context.from_json_data(context)
+            context = Context.from_dict(context)
 
         user_input = context.get_user_input()
         questionId = context.get_current_question()
@@ -114,17 +137,6 @@ class Questionnaire:
 
         return context
     
-    def sendResponse(self, context):
-        if not isinstance(context, Context):
-            context = Context.from_json_data(context)
-
-        questionId = context.get_current_question()
-        user_input = context.read_user_response( questionId )
-        q = self.questions.get(questionId)
-        response = q.respond(context)
-        context.set_message( response )
-        context.set_next_question( q.getNextQuestionName(user_input) )
-        return context
 
     
     def sendFirstMessage(self):
