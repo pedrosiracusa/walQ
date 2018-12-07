@@ -65,6 +65,9 @@ class Context:
     def set_input_options_text(self, text):
         self.usrinput['options_text'] = text
 
+    def get_input_type(self):
+        return self.usrinput['type']
+
     def set_input_type(self, input_type):
         self.usrinput['type']=input_type
         
@@ -99,8 +102,11 @@ class Context:
     def set_message(self,message):
         self.message = message
 
-    def get_message(self):
-        return self.message
+    def get_message(self, with_options=False):
+        if with_options and self.get_input_type()=='choice':
+            return f"{self.message} { {o:t for o,t in zip(self.usrinput['options'], self.usrinput['options_text'])}}"
+        else:
+            return self.message
 
     def set_next_question(self, question_id):
         self.nextquestion = question_id

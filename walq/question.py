@@ -8,10 +8,12 @@ class Question:
         self.options_text = attr.get("options_text")
         self.next = attr.get("next")
         self.user_input_type = attr.get("input_type")
+        self.alias = attr.get("alias")
         self.response = None
 
     def __repr__(self):
-        return str({self.name: {'prompt':self.prompt,
+        return str({self.name: {'alias':self.alias,
+                            'prompt':self.prompt,
                             'options':self.options,
                             'options_text':self.options_text,
                             'next': self.next,
@@ -46,26 +48,20 @@ class Question:
         return self.user_input_type
 
     
-    def getNextQuestionName(self, user_input):
+    def getNextQuestion(self, user_input):
         """
         Checks user input to determine the next question in the graph.
         """
-        if self.next is None:
-            return None
-        
-        if len(self.next)>1:
-            return self.next[ self.options.index(user_input) ]
+        if callable(self.next):
+            return self.next(user_input)
         else:
-            return self.next[0]
+            return self.next
         
     def promptMessage(self):
         """
         Properly formats a message to be prompted to the user.
         """
-        if self.user_input_type=='choice':
-            return f"{self.prompt} {self.getOptions()}"
-        else:
-            return self.prompt
+        return self.prompt
 
     def parseUserInput(self, user_input):
         return { 

@@ -20,46 +20,54 @@ class Questionnaire:
 
         else:
             self.questions = dict()
+
+        self.links=[]
             
 
-    def addQuestion(self, id, prompt, input_type="text", is_initial_question=False, options=None):
+    def addQuestion(self, id, prompt, input_type="text", is_initial_question=False, options=None, alias=None):
         """
         Adds a new question to the questionnaire.
         """
 
-        # text type question
-        if input_type=="text":
-            self.questions[id] = Question( id, prompt=prompt, input_type=input_type)
-
         # multiple-choice question
-        elif input_type=="choice":
+        if isinstance(options,list):
             self.questions[id] = Question( id, prompt=prompt, 
-                                      input_type=input_type,
+                                      input_type='choice',
                                       options=list(range(len(options))),
-                                      options_text=options)
+                                      options_text=options,
+                                      alias=alias)
+
+        # text type question
+        elif input_type=="text":
+            self.questions[id] = Question( id, prompt=prompt, input_type=input_type, alias=alias)
+
 
         # Other types (number)
         else:
-            self.questions[id] = Question( id, prompt=prompt, input_type=input_type)
+            self.questions[id] = Question( id, prompt=prompt, input_type=input_type, alias=alias)
 
         if is_initial_question:
             self.initial_question_id = id
+
+        return self,id
         
 
-    def attachResponse(self, question_id, response_message=None, response_condition=None):
+    def attachResponse(self, question_id, response):
         """
         Attaches a response to a question from the questionnaire.
-        A response can be either a static message (a string) or a condition (a function), in case the response message depends on the user response.
-        In case both a message and a condition are passed, the condition is evaluated.
+        A response can be either a static message (text type) or a condition (function type), in case the response message depends on the user response.
 
         Parameters:
-            question_id: The id of the question to which the response must be attached.
-            response_message: The response to be attached to the question, as a static string.
-            response_condition: The response to be attached to the question, as a condition that is evaluated using the user input.
+        ----------
+        question_id: The id of the question to which the response must be attached.
+        response: string, callable
+            The response to be attached to the question.
         """
+
         question = self.questions.get(question_id)
         if question:
-            question.response = Response(message=response_message, condition=response_condition)
+            question.response = Response( response=response)
+
 
     def setLink(self, q_src, q_tgt, condition=None):
         """
@@ -76,6 +84,15 @@ class Questionnaire:
                 self.questions[q_src].next[1]=q_tgt
             else:
                 self.questions[q_src].next[0]=q_tgt
+
+
+    def link(self, q1, q2):
+        self.links.append( (q1,q2) )
+
+    def setLinks(self):
+        for n_s, n_t in self.links:
+            self.questions.get(n_s).next = n_t
+
 
 
 
@@ -112,7 +129,7 @@ class Questionnaire:
         response = q.respond(context)
         context.set_message( response )
         if not q.isFinalQuestion():
-            context.set_next_question( q.getNextQuestionName(user_input) )
+            context.set_next_question( q.getNextQuestion(user_input) )
         else:
             context.add_flag('last_message')
         return context
@@ -131,7 +148,7 @@ class Questionnaire:
         user_input = context.get_user_input()
         questionId = context.get_current_question()
         q = self.questions.get(questionId)
-        
+
         context.save_user_response( questionId, q.parseUserInput(user_input) )
         context.clear_user_input()
 
@@ -146,6 +163,9 @@ class Questionnaire:
         return self.sendQuestion(context)
 
 
+    def getQuestionsAliases(self):
+        return { qid: q.alias for qid, q in self.questions.items() if q.alias is not None }
+
 
     def run(self):
         # Runs the questionnaire locally, for testing purposes
@@ -157,7 +177,7 @@ class Questionnaire:
         while True:
 
             # Asks first question
-            msg = self.sendQuestion(context).get_message()
+            msg = self.sendQuestion(context).get_message(with_options=True)
 
             # Saves user input
             usr_input = input( msg )

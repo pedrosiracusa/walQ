@@ -1,17 +1,50 @@
-{% if answer != None %}
-    <p>{{answer}}</p>
-{% endif %}
+<!DOCTYPE html>
+<html>
+  <head>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+  </head>
+  <body>
+    <div class="container-fluid">
+      <div class="row justify-content-center">
+        <div class="col-md-4"><h1 class="text-center">walQ</h1></div>
+      </div>
+      <div class="row mt-5 justify-content-center">
+        {% if messages %}
+        <div class="col-md-4">
+          {% for m in messages %}
+          <p>{{m}}</p>
+          {% endfor %}
+        </div>
+        {% endif %}
+      </div>
+      <div class="row justify-content-center mt-3 mb-5">
+        {% if send_input==True %}
+            <form action="http://localhost:5001/" method="POST">
+            {% if input_type == 'choice' %}
+                {% for v in input_vals %}
+                <button type="submit" name="input" value={{v[0]}}>{{v[1]}}</button>
+                {% endfor %}
+            {% else %}
+                <input  type="text", name="input"/>
+            {% endif %}
+            </form>
+        {% endif %}
+      </div>
+      {% if conv_data %}
+      <div class="row justify-content-center mt-3 mb-5">
+        <div class="col-md-4">
+          <p>By the way, here are your responses I've recorded during our conversation:</p>
+          <p>{{conv_data}}</p>
+        </div>
+      </div>
+      {% endif %}
+    </div>
 
-<p>{{message}}</p>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.bundle.min.js" integrity="sha384-pjaaA8dDz/5BgdFUPX6M/9SUZv4d12SUPF0axWc+VRZkx5xU3daN+lYb49+Ax+Tl" crossorigin="anonymous"></script>
 
-{% if message %}
-    <form action="http://localhost:5001/" method="POST">
-    {% if input_type == 'choice' %}
-        {% for v in input_vals %}
-        <button type="submit" name="input" value={{v[0]}}>{{v[1]}}</button>
-        {% endfor %}
-    {% else %}
-        <input  type="text", name="input"/>
-    {% endif %}
-    </form>
-{% endif %}
+    <script>
+window.scrollTo(0,100000);
+    </script>
+  </body>
+</html>

@@ -1,12 +1,16 @@
 class Response:
-    def __init__(self, **attr):
+    def __init__(self, response):
         
-        self.message=attr.get('message')
-        self.condition=attr.get('condition')
-        
+        if callable(response):
+            self.type='function'
+            self.response=response
+        else:
+            self.type='text'
+            self.response=response
+
         
     def getResponse(self, user_input):       
-        if self.condition:
-            return self.condition(user_input)
+        if self.type=='function':
+            return self.response(user_input)
         else:
-            return self.message
+            return self.response
